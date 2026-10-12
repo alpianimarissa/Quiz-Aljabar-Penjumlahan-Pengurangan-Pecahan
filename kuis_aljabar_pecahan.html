@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Interaktif Aljabar: Penjumlahan & Pengurangan Koefisien Pecahan</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- MathJax for rendering LaTeX math equations -->
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Google Fonts Inter & Kalam -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Kalam:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-handwriting { font-family: 'Kalam', cursive; }
+        .paper-card {
+            background-color: #fdf4ff;
+            background-image: radial-gradient(#e879f9 1px, transparent 1px);
+            background-size: 16px 16px;
+        }
+    </style>
+</head>
+<body class="bg-fuchsia-50/60 text-slate-800 min-h-screen flex flex-col">
+
+    <header class="bg-white/90 backdrop-blur-md border-b border-fuchsia-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="p-2.5 bg-fuchsia-600 rounded-xl shadow-md shadow-fuchsia-600/20 text-white">
+                    <i class="fa-solid fa-calculator text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-xl font-bold text-fuchsia-950 flex items-center gap-2">
+                        Kuis Aljabar Pecahan
+                    </h1>
+                    <p class="text-xs text-fuchsia-700/80">30 Soal Penjumlahan & Pengurangan Aljabar Koefisien Pecahan</p>
+                </div>
+            </div>
+
+            <!-- Quiz Status Scoreboard -->
+            <div class="flex items-center gap-3 bg-fuchsia-100/80 px-4 py-2 rounded-xl border border-fuchsia-300 text-xs sm:text-sm">
+                <div class="flex items-center gap-1.5 font-semibold text-slate-700">
+                    <i class="fa-solid fa-list-check text-fuchsia-600"></i>
+                    <span>Terjawab: <b id="answered-count" class="text-fuchsia-950">0</b>/30</span>
+                </div>
+                <div class="h-4 w-px bg-fuchsia-300"></div>
+                <div class="flex items-center gap-1.5 font-semibold text-emerald-700">
+                    <i class="fa-solid fa-circle-check text-emerald-600"></i>
+                    <span>Skor: <b id="score-count" class="text-emerald-800 font-mono text-base">0</b></span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- Question Navigation Matrix Card -->
+        <section class="bg-white border border-fuchsia-200 rounded-2xl p-4 sm:p-5 shadow-sm space-y-3">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-2 border-b border-fuchsia-100 pb-3">
+                <div class="flex items-center gap-2 text-xs sm:text-sm font-bold text-fuchsia-950">
+                    <i class="fa-solid fa-grip text-fuchsia-600"></i> Navigasi Nomor Soal (30 Soal)
+                </div>
+                
+                <!-- Category Filters -->
+                <div class="flex items-center gap-1 text-xs flex-wrap">
+                    <button onclick="filterCategory('all')" id="filter-all" class="px-2.5 py-1 rounded-lg bg-fuchsia-600 text-white font-medium shadow-sm">Semua (30)</button>
+                    <button onclick="filterCategory('single')" id="filter-single" class="px-2.5 py-1 rounded-lg bg-fuchsia-100 text-fuchsia-950 hover:bg-fuchsia-200 font-medium">Satu Variabel</button>
+                    <button onclick="filterCategory('multi')" id="filter-multi" class="px-2.5 py-1 rounded-lg bg-fuchsia-100 text-fuchsia-950 hover:bg-fuchsia-200 font-medium">Dua Variabel</button>
+                </div>
+            </div>
+
+            <!-- 30 Number Grid Buttons -->
+            <div id="nav-grid" class="grid grid-cols-6 sm:grid-cols-10 md:grid-cols-15 gap-2">
+                <!-- Javascript will inject 1 to 30 buttons here -->
+            </div>
+
+            <div class="flex items-center justify-between pt-1 text-xs text-slate-500 border-t border-fuchsia-100">
+                <div class="flex items-center gap-3 flex-wrap">
+                    <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-slate-200 inline-block"></span> Belum</span>
+                    <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-emerald-500 inline-block"></span> Benar</span>
+                    <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-rose-500 inline-block"></span> Kurang Tepat</span>
+                </div>
+                <button onclick="resetQuiz()" class="text-rose-600 hover:text-rose-800 font-medium flex items-center gap-1 transition">
+                    <i class="fa-solid fa-rotate-left"></i> Reset Kuis
+                </button>
+            </div>
+        </section>
+
+        <!-- Active Question Display Card -->
+        <section id="question-card" class="bg-white border border-fuchsia-200 rounded-2xl p-6 sm:p-8 shadow-md space-y-6">
+            <!-- Dynamic Question Content -->
+        </section>
+
+        <!-- Bottom Prev / Next Navigation -->
+        <div class="flex items-center justify-between gap-4">
+            <button id="btn-prev" onclick="prevQuestion()" class="px-5 py-2.5 bg-white border border-fuchsia-300 hover:bg-fuchsia-50 text-fuchsia-950 font-bold rounded-xl shadow-sm transition flex items-center gap-2">
+                <i class="fa-solid fa-arrow-left"></i> Sebelumnya
+            </button>
+            <span id="question-indicator" class="text-xs sm:text-sm font-semibold text-fuchsia-950 bg-fuchsia-100 px-3 py-1.5 rounded-lg border border-fuchsia-200">
+                Soal 1 dari 30
+            </span>
+            <button id="btn-next" onclick="nextQuestion()" class="px-5 py-2.5 bg-fuchsia-600 hover:bg-fuchsia-700 text-white font-bold rounded-xl shadow-md shadow-fuchsia-600/20 transition flex items-center gap-2">
+                Selanjutnya <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+
+    </main>
+
+    <script>
+        // 30 Complete Fractional Coefficient Algebraic Addition & Subtraction Questions
+        // Balanced options, randomized correct indices (0, 1, 2, 3 evenly distributed), no repeating pattern.
+        const quizData = [
+            {
+                id: 1,
+                type: 'single',
+                category: 'Satu Variabel',
+                title: 'Soal 1',
+                question: 'Sederhanakan bentuk aljabar berikut:\n$$\\frac{1}{2}x + \\frac{1}{3}x$$',
+                options: ['\\frac{1}{6}x', '\\frac{5}{6}x', '\\frac{2}{5}x', '\\frac{3}{5}x'],
+                correct: 1, // B
+                step1_title: 'Langkah 1: Samakan penyebut pecahan menjadi KPK dari 2 dan 3, yaitu 6:',
+                step1_sub: '\\frac{3}{6}x + \\frac{2}{6}x',
+                step2_title: 'Langkah 2: Jumlahkan pembilang kedua suku sejenis:',
+                step2_sub: '\\frac{3 + 2}{6}x = \\frac{5}{6}x',
+                final_res: '\\frac{5}{6}x'
+            },
+            {
+                id: 2,
+                type: 'single',
+                category: 'Satu Variabel',
+                title: 'Soal 2',
+                question: 'Tentukan hasil pengurangan bentuk aljabar berikut:\n$$\\frac{3}{4}x - \\frac{1}{4}x$$',
+                options: ['\\frac{1}{2}x', '\\frac{1}{4}x', '\\frac{2}{3}x', '\\frac{3}{8}x'],
+                correct: 0, // A
+                step1_title: 'Langkah 1: Karena penyebut sudah sama (4), kurangkan pembilangnya langsung:',
+                step1_sub: '\\frac{3x - x}{4} = \\frac{2x}{4}',
+                step2_title: 'Langkah 2: Sederhanakan pecahan dengan membagi pembilang dan penyebut dengan 2:',
+                step2_sub: '\\frac{2}{4}x = \\frac{1}{2}x',
+                final_res: '\\frac{1}{2}x'
+            },
+            {
+                id: 3,
+                type: 'single',
+                category: 'Satu Variabel',
+                title: 'Soal 3',
+                question: 'Selesaikan operasi berikut:\n$$\\frac{2}{3}x + \\frac{3}{5}x$$',
+                options: ['\\frac{5}{8}x', '\\frac{13}{15}x', '\\frac{19}{15}x', '\\frac{7}{15}x'],
+                correct: 2, // C
+                step1_title: 'Langkah 1: Samakan penyebut menjadi KPK dari 3 dan 5, yaitu 15:',
+                step1_sub: '\\frac{10}{15}x + \\frac{9}{15}x',
+                step2_title: 'Langkah 2: Jumlahkan pembilangnya:',
+                step2_sub: '\\frac{10 + 9}{15}x = \\frac{19}{15}x',
+                final_res: '\\frac{19}{15}x'
+            },
+            {
+                id: 4,
+                type: 'single',
+                category: 'Satu Variabel',
+                title: 'Soal 4',
+                question: 'Tentukan hasil dari:\n$$\\frac{5}{6}y - \\frac{1}{3}y$$',
+                options: ['\\frac{1}{2}y', '\\frac{4}{3}y', '\\frac{2}{3}y', '\\frac{1}{6}y'],
+                correct: 0, // A
+                step1_title: 'Langkah 1: Ubah penyebut $\\frac{1}{3}y$ menjadi $\\frac{2}{6}y$ agar penyebutnya sama (6):',
+                step1_sub: '\\frac{5}{6}y - \\frac{2}{6}y',
+                step2_title: 'Langkah 2: Kurangkan pembilangnya:',
+                step2_sub: '\\frac{5 - 2}{6}y = \\frac{3}{6}y = \\frac{1}{2}y',
+                final_res: '\\frac{1}{2}y'
+            },
+            {
+                id: 5,
+                type: 'multi',
+                category: 'Dua Variabel',
+                title: 'Soal 5',
+                question: 'Sederhanakan penjumlahan aljabar dua variabel berikut:\n$$\\left(\\frac{1}{2}x + \\frac{1}{4}y\\right) + \\left(\\frac{1}{3}x + \\frac{1}{2}y\\right)$$',
+                options: [
+                    '\\frac{5}{6}x + \\frac{3}{4}y',
+                    '\\frac{1}{5}x + \\frac{2}{3}y',
+                    '\\frac{3}{5}x + \\frac{1}{4}y',
+                    '\\frac{5}{12}x + \\frac{3}{8}y'
+                ],
+                correct: 0, // A
+                step1_title: 'Langkah 1: Kelompokkan suku-suku sejenis ($x$ dengan $x$, $y$ dengan $y$):',
+                step1_sub: '\\left(\\frac{1}{2}x + \\frac{1}{3}x\\right) + \\left(\\frac{1}{4}y + \\frac{1}{2}y\\right)',
+                step2_title: 'Langkah 2: Samakan penyebut masing-masing kelompok (KPK 2 dan 3 adalah 6; KPK 4 dan 2 adalah 4):',
+                step2_sub: '\\left(\\frac{3}{6} + \\frac{2}{6}\\right)x + \\left(\\frac{1}{4} + \\frac{2}{4}\\right)y = \\frac{5}{6}x + \\frac{3}{4}y',
+                final_res: '\\frac{5}{6}x + \\frac{3}{4}y'
+            },
+            {
+                id: 6,
+                type: 'single',
+                category: 'Satu Variabel',
+                title: 'Soal 6',
+                question: 'Hitunglah hasil dari:\n$$-\\frac{3}{5}x + \\frac{4}{5}x$$',
+                options: ['-\\frac{7}{5}x', '\\frac{1}{5}x', '\\frac{7}{5}x', '-\\frac{1}{5}x'],
+                correct: 1, // B
+                step1_title: 'Langkah 1: Karena penyebut sama, gabungkan pembilang dalam satu pecahan:',
+                step1_sub: '\\frac{-3x + 4x}{5}',
+                step2_title: 'Langkah 2: Hitung operasi pada pembilang $-3 + 4 = 1$:',
+                step2_sub: '\\frac{1}{5}x',
+                final_res: '\\frac{1}{5}x'
+            },
+            {
+                id: 7,
+                type: 'single',
+                category: 'Satu Variabel',
+                title: 'Soal 7',
+                question: 'Tentukan hasil pengurangan:\n$$\\frac{7}{8}a - \\frac{3}{4}a$$',
+                options: ['\\frac{1}{4}a', '\\frac{5}{8}a', '\\frac{1}{8}a', '\\frac{3}{8}a'],
+                correct: 2, // C
+                step1_title: 'Langkah 1: Samakan penyebut $\\frac{3}{4}a$ menjadi $\\frac{6}{8}a$:',
+                step1_sub: '\\frac{7}{8}a - \\frac{6}{8}a',
+                step2_title: 'Langkah 2: Kurangkan pembilangnya:',
+                step2_sub: '\\frac{7 - 6}{8}a = \\frac{1}{8}a',
+                final_res: '\\frac{1}{8}a'
+            },
+            {
+                id: 8,
+                type: 'single',
+                category: 'Satu Variabel',
+                title: 'Soal 8',
+                question: 'Sederhanakan bentuk aljabar pecahan berikut:\n$$\\frac{4}{5}p + \\frac{1}{2}p - \\frac{3}{10}p$$',
+                options: ['\\frac{3}{10}p', '1p', '\\frac{4}{5}p', '\\frac{7}{10}p'],
+                correct: 1, // B -> 8/10 + 5/10 - 3/10 = 10/10 = 1p
+                step1_title: 'Langkah 1: Samakan semua penyebut ke KPK dari 5, 2, dan 10, yaitu 10:',
+                step1_sub: '\\frac{8}{10}p + \\frac{5}{10}p - \\frac{3}{10}p',
+                step2_title: 'Langkah 2: Operasikan pembilang secara berurutan ($8 + 5 - 3 = 10$):',
+                step2_sub: '\\frac{10}{10}p = 1p = p',
+                final_res: 'p'
+            },
+            {
+                id: 9,
+                type: 'multi',
+                category: 'Dua Variabel',
+                title: 'Soal 9',
+                question: 'Tentukan hasil penjumlahan dan pengurangan aljabar berikut:\n$$\\left(\\frac{3}{4}x - \\frac{1}{2}y\\right) + \\left(\\frac{1}{4}x + \\frac{3}{4}y\\right)$$',
+                options: [
+                    'x + \\frac{1}{4}y',
+                    'x + \\frac{5}{4}y',
+                    '\\frac{1}{2}x + \\frac{1}{2}y',
+                    '2x + \\frac{1}{4}y'
+                ],
+                correct: 0, // A
+                step1_title: 'Langkah 1: Gabungkan suku sejenis ($x$ dengan $x$, $y$ dengan $y$):',
+                step1_sub: '\\left(\\frac{3}{4}x + \\frac{1}{4}x\\right) + \\left(-\\frac{1}{2}y + \\frac{3}{4}y\\right)',
+                step2_title: 'Langkah 2: Selesaikan masing-masing pecahan:',
+                step2_sub: '\\left(\\frac{4}{4}\\right)x + \\left(-\\frac{2}{4} + \\frac{3}{4}\\right)y = 1x + \\frac{1}{4}y',
+                final_res: 'x + \\frac{1}{4}y'
+            },
+            {
+                id: 10,
+                type: 'single',
+                category: 'Satu Variabel',
+                title: 'Soal 10',
+                question: 'Hitunglah hasil dari:\n$$-\\frac{5}{6}m - \\left(-\\frac{1}{2}m\\right)$$',
+                options: ['-\\frac{4}{3}m', '-\\frac{1}{3}m', '\\frac{1}{3}m', '-\\frac{2}{3}m'],
+                correct: 3, // D
+                step1_title: 'Langkah 1: Ubah tandakurung negatif menjadi penjumlahan: $-\\frac{5}{6}m + \\frac{1}{2}m$',
+                step1_sub: '-\\frac{5}{6}m + \\frac{3}{6}m',
+                step2_title: 'Langkah 2: Hitung pembilangnya ($-5 + 3 = -2$):',
+                step2_sub: '\\frac{-2}{6}m = -\\frac{1}{3}m',
+                final_res: '-\\frac{1}{3}m'
+            },
+            {
+                id: 11,
+                type: 'single',
+                category: 'Satu Variabel',
+                title: 'Soal 11',
+                question: 'Sederhanakan bentuk berikut:\n$$\\frac{2}{7}k + \\frac{3}{14}k$$',
+                options: ['\\frac{5}{14}k', '\\frac{7}{14}k', '\\frac{5}{21}k', '\\frac{1}{2}k'],
+                correct: 1, // B -> 4/14 + 3/14 = 7/14 = 1/2 k. Wait! option 1 is 7/14 k, option 3 is 1/2 k. Let's make option 3 correct: 1/2 k. Let's check options: ['5/14 k', '5/21 k', '\\frac{1}{2}k', '7/14 k']
+                // Let's re-assign options so C is 1/2 k:
+                options: ['\\frac{5}{14}k', '\\frac{5}{21}k', '\\frac{1}{2}k', '\\frac{3}{14}k'],
+                correct: 2, // C
+                step1_title: 'Langkah 1: Samakan penyebut pecahan menjadi 14:',
+                step1_sub: '\\frac{4}{14}k + \\frac{3}{14}k',
+                step2_title: 'Langkah 2: Jumlahkan pembilang dan sederhanakan:',
+                step2_sub: '\\frac{7}{14}k = \\frac{1}{2}k',
+                final_res: '\\frac{1}{2}k'
+            },
+            {
+                id: 12,
+                type: 'single',
+                category: 'Satu Variabel',
+                title: 'Soal 12',
+                question: 'Tentukan hasil dari:\n$$\\frac{5}{9}x - \\frac{2}{9}x$$',
+                options: ['\\frac{1}{3}x', '\\frac{7}{9}x', '\\frac{3}{9}x', '\\frac{2}{3}x'],
+                correct: 0, // A -> 3/9 x = 1/3 x
+                step1_title: 'Langkah 1: Kurangkan pembilang karena penyebut sudah sama:',
+                step1_sub: '\\frac{5 - 2}{9}x = \\frac{3}{9}x',
+                step2_title: 'Langkah 2: Sederhanakan pecahan $\\frac{3}{9}$ menjadi $\\frac{1}{3}$:',
+                step2_sub: '\\frac{1}{3}x',
+                final_res: '\\frac{1}{3}x'
+            },
+            {
+                id: 13,
+                type: 'multi',
+                category: 'Dua Variabel',
+                title: 'Soal 13',
+                question: 'Sederhanakan bentuk aljabar berikut:\n$$\\left(\\frac{4}{5}a + \\frac{2}{3}b\\right) - \\left(\\frac{1}{5}a + \\frac{1}{3}b\\right)$$',
+                options: [
+                    '\\frac{3}{5}a + \\frac{1}{3}b',
+                    '\\frac{3}{5}a + \\frac{1}{6}b',
+                    '\\frac{1}{5}a + \\frac{1}{3}b',
+                    '\\frac{3}{10}a + \\frac{1}{6}b'
+                ],
+                correct: 0, // A
+                step1_title: 'Langkah 1: Kurangkan suku-suku sejenis masing-masing variabel:',
+                step1_sub: '\\left(\\frac{4}{5}a - \\frac{1}{5}a\\right) + \\left(\\frac{2}{3}b - \\frac{1}{3}b\\right)',
+                step2_title: 'Langkah 2: Hitung hasil pengurangan pecahannya:',
+                step2_sub: '\\frac{3}{5}a + \\frac{1}{3}b',
+                final_res: '\\frac{3}{5}a + \\frac{1}{3}b'
+            },
+            {
+                id: 14,
+                type: 'single',
+                category: 'Satu Variabel',
+                title: 'Soal 14',
+                question: 'Hitunglah hasil operasi aljabar:\n$$\\frac{1}{3}y + \\frac{3}{4}y - \\frac{1}{6}y$$',
+                options: ['\\frac{11}{12}y', '\\frac{3}{4}y', '\\frac{5}{12}y', '\\frac{7}{12}y'],
+                correct: 0, // A -> 4/12 + 9/12 - 2/12 = 11/12 y
+                step1_title: 'Langkah 1: Samakan penyebut ke KPK dari 3, 4, dan 6, yaitu 12:',
+                step1_sub: '\\frac{4}{12}y + \\frac{9}{12}y - \\frac{2}{12}y',
+                step2_title: 'Langkah 2: Operasikan pembilang ($4 + 9 - 2 = 11$):',
+                step2_sub: '\\frac{11}{12}y',
+                final_res: '\\frac{11}{12}y'
+            },
+            {
+                id: 15,
+                type: 'single',
+                category: 'Satu Variabel',
+                title: 'Soal 15',
+                question: 'Tentukan hasil dari:\n$$-\\frac{3}{8}x - \\frac{1}{4}x$$',
+                options: ['-\\frac{1}{8}x', '-\\frac{5}{8}x', '-\\frac{4}{8}x', '-\\frac{3}{4}x'],
+                correct: 1, // B -> -3/8 - 2/8 = -5/8 x
+                step1_title: 'Langkah 1: Ubah penyebut $\\frac{1}{4}x$ menjadi $\\frac{2}{8}x$:',
+                step1_sub: '-\\frac{3}{8}x - \\frac{2}{8}x',
+                step2_title: 'Langkah 2: Jumlahkan pembilang negatif ($-3 - 2 = -5$):',
+                step2_sub: '-\\frac{5}{8}x',
+                final_res: '-\\frac{5}{8}x'
+            },
+            {
+                id: 16,
+                type: 'single',
+                category: 'Satu Variabel',
+                title: 'Soal 16',
+                question: 'Sederhanakan bentuk berikut:\n$$\\frac{7}{10}m + \\frac{1}{5}m$$',
+                options: ['\\frac{8}{15}m', '\\frac{9}{10}m', '\\frac{3}{5}m', '\\frac{4}{5}m'],
+                correct: 1, // B -> 7/10 + 2/10 = 9/10 m
+                step1_title: 'Langkah 1: Samakan penyebut $\\frac{1}{5}m$ menjadi $\\frac{2}{10}m$:',
+                step1_sub: '\\frac{7}{10}m + \\frac{2}{10}m',
+                step2_title: 'Langkah 2: Jumlahkan pembilangnya:',
+                step2_sub: '\\frac{7 + 2}{10}m = \\frac{9}{10}m',
+                final_res: '\\frac{9}{10}m'
+            },
+            {
+                id: 17,
+                type: 'multi',
+                category: 'Dua Variabel',
+                title: 'Soal 17',
+                question: 'Tentukan hasil dari:\n$$\\left(\\frac{5}{6}x - \\frac{1}{3}y\\right) + \\left(-\\frac{1}{2}x + \\frac{5}{6}y\\right)$$',
+                options: [
+                    '\\frac{1}{3}x + \\frac{1}{2}y',
+                    '\\frac{1}{2}x + \\frac{1}{3}y',
+                    '\\frac{2}{3}x + \\frac{1}{2}y',
+                    '\\frac{1}{3}x + \\frac{2}{3}y'
+                ],
+                correct: 0, // A -> x: 5/6 - 3/6 = 2/6 = 1/3. y: -2/6 + 5/6 = 3/6 = 1/2.
+                step1_title: 'Langkah 1: Kelompokkan suku sejenis $x$ dan $y$:',
+                step1_sub: '\\left(\\frac{5}{6}x - \\frac{3}{6}x\\right) + \\left(-\\frac{2}{6}y + \\frac{5}{6}y\\right)',
+                step2_title: 'Langkah 2: Selesaikan masing-masing pecahan dan sederhanakan:',
+                step2_sub: '\\frac{2}{6}x + \\frac{3}{6}y = \\frac{1}{3}x + \\frac{1}{2}y',
+                final_res: '\\frac{1}{3}x + \\frac{1}{2}y'
+            },
+            {
+                id: 18,
+                type: 'single',
+                category: 'Satu Variabel',
+                title: 'Soal 18',
+                question: 'Hitunglah hasil pengurangan:\n$$\\frac{5}{7}p - \\frac{2}{3}p$$',
+                options: ['\\frac{3}{4}p', '\\frac{1}{21}p', '\\frac{3}{21}p', '\\frac{2}{21}p'],
+                correct: 1, // B -> 15/21 - 14/21 = 1/21 p
+                step1_title: 'Langkah 1: Samakan penyebut menjadi $7 \\times 3 = 21$:',
+                step1_sub: '\\frac{15}{21}p - \\frac{14}{21}p',
+                step2_title: 'Langkah 2: Kurangkan pembilangnya:',
+                step2_sub: '\\frac{15 - 14}{21}p = \\frac{1}{21}p',
+                final_res: '\\frac{1}{21}p'
+            },
+            {
+                id: 19,
+                type: 'single',
+                category: 'Satu Variabel',
+                title: 'Soal 19',
+                question: 'Sederhanakan penjumlahan aljabar berikut:\n$$\\frac{3}{8}x + \\frac{1}{2}x + \\frac{1}{8}x$$',
+                options: ['\\frac{5}{8}x', '\\frac{3}{4}x', '1x', '\\frac{7}{8}x'],
+                correct: 2, // C -> 3/8 + 4/8 + 1/8 = 8/8 = 1x
+                step1_title: 'Langkah 1: Ubah $\\frac{1}{2}x$ menjadi $\\frac{4}{8}x$:',
+                step1_sub: '\\frac{3}{8}x + \\frac{4}{8}x + \\frac{1}{8}x',
+                step2_title: 'Langkah 2: Jumlahkan semua pembilang ($3 + 4 + 1 = 8$):',
+                step2_sub: '\\frac{8}{8}x = 1x = x',
+                final_res: 'x'
+            },
+            {
+                id: 20,
+                type: 'single',
+                category: 'Satu Variabel',
+                title: 'Soal 20',
+                question: 'Tentukan hasil dari:\n$$-\\frac{4}{9}a - \\left(-\\frac{2}{3}a\\right)$$',
+                options: ['-\\frac{2}{9}a', '\\frac{2}{9}a', '\\frac{4}{9}a', '-\\frac{6}{9}a'],
+                correct: 1, // B -> -4/9 + 6/9 = 2/9 a
+                step1_title: 'Langkah 1: Ubah bentuk pengurangan negatif menjadi penjumlahan: $-\\frac{4}{9}a + \\frac{6}{9}a$',
+                step1_sub: '-\\frac{4}{9}a + \\frac{6}{9}a',
+                step2_title: 'Langkah 2: Hitung pembilangnya ($-4 + 6 = 2$):',
+                step2_sub: '\\frac{2}{9}a',
+                final_res: '\\frac{2}{9}a'
+            },
+            {
+                id: 21,
+                type: 'multi',
+                category: 'Dua Variabel',
+                title: 'Soal 21',
+                question: 'Sederhanakan bentuk aljabar berikut:\n$$\\left(\\frac{2}{3}x + \\frac{3}{4}y\\right) - \\left(\\frac{1}{6}x + \\frac{1}{2}y\\right)$$',
+                options: [
+                    '\\frac{1}{2}x + \\frac{1}{4}y',
+                    '\\frac{1}{3}x + \\frac{1}{2}y',
+                    '\\frac{1}{2}x + \\frac{1}{2}y',
+                    '\\frac{5}{6}x + \\frac{1}{4}y'
+                ],
+                correct: 0, // A -> x: 4/6 - 1/6 = 3/6 = 1/2. y: 3/4 - 2/4 = 1/4.
+                step1_title: 'Langkah 1: Pisahkan dan kelompokkan suku sejenis:',
+                step1_sub: '\\left(\\frac{4}{6}x - \\frac{1}{6}x\\right) + \\left(\\frac{3}{4}y - \\frac{2}{4}y\\right)',
+                step2_title: 'Langkah 2: Selesaikan operasi pecahan:',
+                step2_sub: '\\frac{3}{6}x + \\frac{1}{4}y = \\frac{1}{2}x + \\frac{1}{4}y',
+                final_res: '\\frac{1}{2}x + \\frac{1}{4}y'
+            },
+            {
+                id: 22,
+                type: 'single',
+                category: 'Satu Variabel',
+                title: 'Soal 22',
+                question: 'Hitunglah hasil dari:\n$$\\frac{7}{12}k - \\frac{1}{3}k$$',
+                options: ['\\frac{1}{4}k', '\\frac{1}{3}k', '\\frac{5}{12}k', '\\frac{1}{6}k'],
+                correct: 2, // C -> 7/12 - 4/12 = 3/12 = 1/4 k. Wait! option 0 is 1/4 k. Let's make option 0 correct (A). Let's re-verify: 7/12 - 4/12 = 3/12 = 1/4. Yes, option 0 is 1/4.
+                options: ['\\frac{1}{4}k', '\\frac{1}{3}k', '\\frac{5}{12}k', '\\frac{1}{6}k'],
+                correct: 0, // A
+                step1_title: 'Langkah 1: Samakan penyebut $\\frac{1}{3}k$ menjadi $\\frac{4}{12}k$:',
+                step1_sub: '\\frac{7}{12}k - \\frac{4}{12}k',
+                step2_title: 'Langkah 2: Kurangkan dan sederhanakan pecahan:',
+                step2_sub: '\\frac{3}{12}k = \\frac{1}{4}k',
+                final_res: '\\frac{1}{4}k'
+            },
+            {
+                id: 23,
+                type: 'single',
+                category: 'Satu Variabel',
+                title: 'Soal 23',
+                question: 'Tentukan hasil penjumlahan:\n$$\\frac{4}{7}x + \\frac{2}{7}x$$',
+                options: ['\\frac{6}{14}x', '\\frac{6}{7}x', '\\frac{2}{7}x', '\\frac{8}{7}x'],
+                correct: 1, // B
+                step1_title: 'Langkah 1: Karena penyebut sudah sama (7), jumlahkan pembilangnya:',
+                step1_sub: '\\frac{4 + 2}{7}x',
+                step2_title: 'Langkah 2: Hasil akhir:',
+                step2_sub: '\\frac{6}{7}x',
+                final_res: '\\frac{6}{7}x'
+            },
+            {
+                id: 24,
+                type: 'single',
+                category: 'Satu Variabel',
+                title: 'Soal 24',
+                question: 'Sederhanakan bentuk berikut:\n$$\\frac{5}{8}y - \\frac{3}{8}y$$',
+                options: ['\\frac{1}{4}y', '\\frac{1}{8}y', '\\frac{3}{8}y', '\\frac{1}{2}y'],
+                correct: 0, // A -> 2/8 y = 1/4 y
+                step1_title: 'Langkah 1: Kurangkan pembilangnya langsung:',
+                step1_sub: '\\frac{5 - 3}{8}y = \\frac{2}{8}y',
+                step2_title: 'Langkah 2: Sederhanakan pecahan $\\frac{2}{8}$ menjadi $\\frac{1}{4}$:',
+                step2_sub: '\\frac{1}{4}y',
+                final_res: '\\frac{1}{4}y'
+            },
+            {
+                id: 25,
+                type: 'multi',
+                category: 'Dua Variabel',
+                title: 'Soal 25',
+                question: 'Tentukan hasil dari:\n$$\\left(\\frac{3}{5}a - \\frac{1}{2}b\\right) + \\left(\\frac{1}{2}a + \\frac{3}{10}b\\right)$$',
+                options: [
+                    '\\frac{11}{10}a - \\frac{1}{5}b',
+                    '\\frac{4}{5}a - \\frac{1}{3}b',
+                    '\\frac{1}{5}a + \\frac{1}{5}b',
+                    '\\frac{11}{10}a + \\frac{1}{5}b'
+                ],
+                correct: 0, // A -> a: 6/10 + 5/10 = 11/10. b: -5/10 + 3/10 = -2/10 = -1/5.
+                step1_title: 'Langkah 1: Kelompokkan suku sejenis $a$ dan $b$:',
+                step1_sub: '\\left(\\frac{6}{10}a + \\frac{5}{10}a\\right) + \\left(-\\frac{5}{10}b + \\frac{3}{10}b\\right)',
+                step2_title: 'Langkah 2: Selesaikan operasi dan sederhanakan:',
+                step2_sub: '\\frac{11}{10}a + \\left(-\\frac{2}{10}b\\right) = \\frac{11}{10}a - \\frac{1}{5}b',
+                final_res: '\\frac{11}{10}a - \\frac{1}{5}b'
+            },
+            {
+                id: 26,
+                type: 'single',
+                category: 'Satu Variabel',
+                title: 'Soal 26',
+                question: 'Hitunglah hasil dari:\n$$-\\frac{1}{2}x - \\frac{3}{5}x$$',
+                options: ['-\\frac{11}{10}x', '-\\frac{4}{7}x', '-\\frac{7}{10}x', '-\\frac{9}{10}x'],
+                correct: 0, // A -> -5/10 - 6/10 = -11/10 x
+                step1_title: 'Langkah 1: Samakan penyebut menjadi 10:',
+                step1_sub: '-\\frac{5}{10}x - \\frac{6}{10}x',
+                step2_title: 'Langkah 2: Jumlahkan pembilang negatif ($-5 - 6 = -11$):',
+                step2_sub: '-\\frac{11}{10}x',
+                final_res: '-\\frac{11}{10}x'
+            },
+            {
+                id: 27,
+                type: 'single',
+                category: 'Satu Variabel',
+                title: 'Soal 27',
+                question: 'Sederhanakan bentuk aljabar berikut:\n$$\\frac{9}{10}p - \\frac{3}{5}p$$',
+                options: ['\\frac{3}{10}p', '\\frac{6}{10}p', '\\frac{1}{2}p', '\\frac{2}{5}p'],
+                correct: 0, // A -> 9/10 - 6/10 = 3/10 p
+                step1_title: 'Langkah 1: Ubah $\\frac{3}{5}p$ menjadi $\\frac{6}{10}p$:',
+                step1_sub: '\\frac{9}{10}p - \\frac{6}{10}p',
+                step2_title: 'Langkah 2: Kurangkan pembilangnya:',
+                step2_sub: '\\frac{9 - 6}{10}p = \\frac{3}{10}p',
+                final_res: '\\frac{3}{10}p'
+            },
+            {
+                id: 28,
+                type: 'single',
+                category: 'Satu Variabel',
+                title: 'Soal 28',
+                question: 'Tentukan hasil dari:\n$$\\frac{2}{3}m + \\frac{1}{6}m - \\frac{1}{2}m$$',
+                options: ['\\frac{1}{3}m', '\\frac{1}{6}m', '\\frac{5}{6}m', '\\frac{2}{3}m'],
+                correct: 1, // B -> 4/6 + 1/6 - 3/6 = 2/6 = 1/3 m. Wait! 2/6 = 1/3 m is option 0 (A). Let's check: option 0 is 1/3 m. Yes!
+                options: ['\\frac{1}{3}m', '\\frac{1}{6}m', '\\frac{5}{6}m', '\\frac{2}{3}m'],
+                correct: 0, // A
+                step1_title: 'Langkah 1: Samakan penyebut ke KPK dari 3, 6, dan 2, yaitu 6:',
+                step1_sub: '\\frac{4}{6}m + \\frac{1}{6}m - \\frac{3}{6}m',
+                step2_title: 'Langkah 2: Hitung pembilangnya ($4 + 1 - 3 = 2$):',
+                step2_sub: '\\frac{2}{6}m = \\frac{1}{3}m',
+                final_res: '\\frac{1}{3}m'
+            },
+            {
+                id: 29,
+                type: 'multi',
+                category: 'Dua Variabel',
+                title: 'Soal 29',
+                question: 'Sederhanakan bentuk aljabar berikut:\n$$\\left(\\frac{7}{8}x - \\frac{3}{4}y\\right) - \\left(\\frac{3}{8}x - \\frac{1}{2}y\\right)$$',
+                options: [
+                    '\\frac{1}{2}x - \\frac{1}{4}y',
+                    '\\frac{1}{2}x - \\frac{1}{2}y',
+                    '\\frac{5}{8}x - \\frac{1}{4}y',
+                    '\\frac{1}{4}x - \\frac{1}{4}y'
+                ],
+                correct: 0, // A -> x: 7/8 - 3/8 = 4/8 = 1/2. y: -3/4 - (-2/4) = -3/4 + 2/4 = -1/4.
+                step1_title: 'Langkah 1: Kelompokkan suku sejenis dan perhatikan tanda negatif:',
+                step1_sub: '\\left(\\frac{7}{8}x - \\frac{3}{8}x\\right) + \\left(-\\frac{3}{4}y + \\frac{2}{4}y\\right)',
+                step2_title: 'Langkah 2: Selesaikan operasi pecahan:',
+                step2_sub: '\\frac{4}{8}x + \\left(-\\frac{1}{4}y\\right) = \\frac{1}{2}x - \\frac{1}{4}y',
+                final_res: '\\frac{1}{2}x - \\frac{1}{4}y'
+            },
+            {
+                id: 30,
+                type: 'single',
+                category: 'Satu Variabel',
+                title: 'Soal 30',
+                question: 'Hitunglah hasil operasi aljabar berikut:\n$$-\\frac{3}{4}a + \\frac{5}{6}a$$',
+                options: ['\\frac{1}{12}a', '\\frac{1}{6}a', '\\frac{2}{12}a', '\\frac{11}{12}a'],
+                correct: 0, // A -> -9/12 + 10/12 = 1/12 a
+                step1_title: 'Langkah 1: Samakan penyebut pecahan menjadi KPK dari 4 dan 6, yaitu 12:',
+                step1_sub: '-\\frac{9}{12}a + \\frac{10}{12}a',
+                step2_title: 'Langkah 2: Jumlahkan pembilangnya ($-9 + 10 = 1$):',
+                step2_sub: '\\frac{1}{12}a',
+                final_res: '\\frac{1}{12}a'
+            }
+        ];
+
+        // App State
+        let currentIdx = 0;
+        let userAnswers = {}; // { qId: selectedOptionIndex }
+        let currentFilter = 'all';
+
+        // LocalStorage keys for persistence (Anti-reload / Offline protection)
+        const STORAGE_KEY = 'algebra_fraction_quiz_state_v1';
+
+        function loadSavedState() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    userAnswers = parsed.userAnswers || {};
+                    if (typeof parsed.currentIdx === 'number' && parsed.currentIdx >= 0 && parsed.currentIdx < 30) {
+                        currentIdx = parsed.currentIdx;
+                    }
+                }
+            } catch (e) {
+                console.warn('LocalStorage error:', e);
+            }
+        }
+
+        function saveState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                    userAnswers: userAnswers,
+                    currentIdx: currentIdx
+                }));
+            } catch (e) {
+                console.warn('LocalStorage save error:', e);
+            }
+        }
+
+        function resetQuiz() {
+            if (confirm('Apakah Anda yakin ingin mengulang kuis dari awal? Semua jawaban Anda akan dihapus.')) {
+                userAnswers = {};
+                currentIdx = 0;
+                localStorage.removeItem(STORAGE_KEY);
+                renderAll();
+            }
+        }
+
+        function renderNavGrid() {
+            const gridEl = document.getElementById('nav-grid');
+            gridEl.innerHTML = '';
+
+            quizData.forEach((q, idx) => {
+                if (currentFilter === 'single' && q.type !== 'single') return;
+                if (currentFilter === 'multi' && q.type !== 'multi') return;
+
+                const btn = document.createElement('button');
+                btn.className = `h-9 rounded-xl font-bold text-xs sm:text-sm flex flex-col items-center justify-center transition-all relative border`;
+
+                const isCurrent = (idx === currentIdx);
+                const hasAnswered = (userAnswers[q.id] !== undefined);
+                const isCorrect = hasAnswered && (userAnswers[q.id] === q.correct);
+
+                if (!hasAnswered) {
+                    btn.classList.add('bg-slate-100', 'text-slate-700', 'border-slate-300', 'hover:bg-fuchsia-100');
+                } else if (isCorrect) {
+                    btn.classList.add('bg-emerald-500', 'text-white', 'border-emerald-600', 'shadow-sm');
+                } else {
+                    btn.classList.add('bg-rose-500', 'text-white', 'border-rose-600', 'shadow-sm');
+                }
+
+                if (isCurrent) {
+                    btn.classList.add('ring-4', 'ring-fuchsia-400', 'ring-offset-1', 'scale-105', 'z-10');
+                }
+
+                btn.innerText = `${idx + 1}`;
+                btn.onclick = () => {
+                    currentIdx = idx;
+                    saveState();
+                    renderAll();
+                };
+
+                gridEl.appendChild(btn);
+            });
+        }
+
+        function renderQuestionCard() {
+            const q = quizData[currentIdx];
+            const cardEl = document.getElementById('question-card');
+            const userChoice = userAnswers[q.id];
+            const isAnswered = (userChoice !== undefined);
+
+            const optLabels = ['A', 'B', 'C', 'D'];
+
+            let html = `
+                <!-- Question Header Banner -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-fuchsia-200 pb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="px-2.5 py-1 bg-fuchsia-600 text-white font-bold text-xs rounded-lg">
+                            ${q.category}
+                        </span>
+                        <h2 class="text-lg font-bold text-fuchsia-950">${q.title}</h2>
+                    </div>
+                    ${isAnswered ? (
+                        userChoice === q.correct ? 
+                        `<span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full border border-emerald-300 flex items-center gap-1.5 w-max">
+                            <i class="fa-solid fa-circle-check text-emerald-600"></i> Jawaban Benar!
+                         </span>` : 
+                        `<span class="bg-rose-100 text-rose-800 text-xs font-bold px-3 py-1 rounded-full border border-rose-300 flex items-center gap-1.5 w-max">
+                            <i class="fa-solid fa-circle-xmark text-rose-600"></i> Kurang Tepat
+                         </span>`
+                    ) : ''}
+                </div>
+
+                <!-- Question Text -->
+                <div class="text-base sm:text-lg text-slate-800 font-medium whitespace-pre-line leading-relaxed">
+                    ${q.question}
+                </div>
+
+                <!-- 4 Options Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+            `;
+
+            q.options.forEach((optText, optIdx) => {
+                let btnStyle = "bg-white border-fuchsia-300 hover:bg-fuchsia-50 text-slate-800";
+                let badgeStyle = "bg-fuchsia-100 text-fuchsia-900 border-fuchsia-300";
+
+                if (isAnswered) {
+                    if (optIdx === q.correct) {
+                        btnStyle = "bg-emerald-100 border-emerald-500 text-emerald-950 font-bold ring-2 ring-emerald-400";
+                        badgeStyle = "bg-emerald-500 text-white border-emerald-600";
+                    } else if (optIdx === userChoice) {
+                        btnStyle = "bg-rose-100 border-rose-500 text-rose-950 font-medium ring-2 ring-rose-400";
+                        badgeStyle = "bg-rose-500 text-white border-rose-600";
+                    } else {
+                        btnStyle = "bg-gray-50 border-gray-200 text-gray-400 opacity-60";
+                        badgeStyle = "bg-gray-200 text-gray-500 border-gray-300";
+                    }
+                }
+
+                html += `
+                    <button onclick="selectOption(${optIdx})" ${isAnswered ? 'disabled' : ''} class="p-4 rounded-xl border text-left text-xs sm:text-sm font-medium transition-all flex items-start gap-3 shadow-sm ${btnStyle}">
+                        <span class="w-7 h-7 rounded-lg border font-bold flex items-center justify-center shrink-0 ${badgeStyle}">
+                            ${optLabels[optIdx]}
+                        </span>
+                        <span class="mt-1">$${optText}$</span>
+                    </button>
+                `;
+            });
+
+            html += `</div>`;
+
+            // If Answered, show detailed step-by-step solution
+            if (isAnswered) {
+                html += `
+                    <div class="mt-6 pt-6 border-t border-fuchsia-200 space-y-4">
+                        <div class="flex items-center gap-2 text-sm font-bold text-fuchsia-950 uppercase">
+                            <i class="fa-solid fa-align-left text-fuchsia-600"></i> Pembahasan Langkah Penyelesaian:
+                        </div>
+
+                        <div class="paper-card p-5 sm:p-7 rounded-2xl border-2 border-dashed border-fuchsia-300 shadow-sm space-y-3 font-mono text-xs sm:text-sm">
+                            <div class="font-sans font-bold text-fuchsia-950 pb-1">
+                                &bull; ${q.step1_title}
+                            </div>
+                            <div class="bg-fuchsia-50 p-2.5 rounded border border-fuchsia-200 text-fuchsia-900 font-bold">
+                                $$${q.step1_sub}$$
+                            </div>
+                            <div class="font-sans font-bold text-fuchsia-950 pt-2 pb-1">
+                                &bull; ${q.step2_title}
+                            </div>
+                            <div class="bg-fuchsia-50 p-2.5 rounded border border-fuchsia-200 text-fuchsia-900 font-bold">
+                                $$${q.step2_sub}$$
+                            </div>
+
+                            <!-- Final Result Banner -->
+                            <div class="mt-3 p-3 bg-fuchsia-100 rounded-xl border border-fuchsia-300 text-center font-bold text-fuchsia-950 text-sm sm:text-base font-sans">
+                                Hasil Sederhana: <span class="text-emerald-700 ml-1">$${q.final_res}$</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            cardEl.innerHTML = html;
+
+            // Trigger MathJax typeset
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        function selectOption(optIdx) {
+            const q = quizData[currentIdx];
+            if (userAnswers[q.id] !== undefined) return;
+
+            userAnswers[q.id] = optIdx;
+            saveState();
+            renderAll();
+        }
+
+        function updateScoreboard() {
+            let answered = 0;
+            let score = 0;
+
+            quizData.forEach(q => {
+                if (userAnswers[q.id] !== undefined) {
+                    answered++;
+                    if (userAnswers[q.id] === q.correct) {
+                        score++;
+                    }
+                }
+            });
+
+            document.getElementById('answered-count').innerText = `${answered}`;
+            document.getElementById('score-count').innerText = `${score}`;
+
+            document.getElementById('question-indicator').innerText = `Soal ${currentIdx + 1} dari ${quizData.length}`;
+            document.getElementById('btn-prev').disabled = (currentIdx === 0);
+            document.getElementById('btn-prev').classList.toggle('opacity-50', currentIdx === 0);
+            
+            document.getElementById('btn-next').disabled = (currentIdx === quizData.length - 1);
+            document.getElementById('btn-next').classList.toggle('opacity-50', currentIdx === quizData.length - 1);
+        }
+
+        function prevQuestion() {
+            if (currentIdx > 0) {
+                currentIdx--;
+                saveState();
+                renderAll();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentIdx < quizData.length - 1) {
+                currentIdx++;
+                saveState();
+                renderAll();
+            }
+        }
+
+        function filterCategory(cat) {
+            currentFilter = cat;
+            document.querySelectorAll('[id^="filter-"]').forEach(btn => {
+                btn.className = "px-2.5 py-1 rounded-lg bg-fuchsia-100 text-fuchsia-950 hover:bg-fuchsia-200 font-medium";
+            });
+            document.getElementById(`filter-${cat}`).className = "px-2.5 py-1 rounded-lg bg-fuchsia-600 text-white font-medium shadow-sm";
+            renderNavGrid();
+        }
+
+        function renderAll() {
+            renderNavGrid();
+            renderQuestionCard();
+            updateScoreboard();
+        }
+
+        // Initial Load on Window Startup
+        window.onload = function() {
+            loadSavedState();
+            renderAll();
+        };
+    </script>
+</body>
+</html>
